@@ -61,11 +61,6 @@ export function PatientPage(props: PatientPageProps) {
       .patch(`http://localhost:3333/patients/${patientId}`, {
         contacted: newContactedValue,
       })
-      .then((response) => {
-        if (response?.data) {
-          setPatient(response.data);
-        }
-      })
       .catch((error) => {
         console.error('Error updating patient:', error);
         // Optionally, revert the local state if the update fails
