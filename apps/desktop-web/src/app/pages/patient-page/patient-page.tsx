@@ -51,8 +51,26 @@ export function PatientPage(props: PatientPageProps) {
    * @param newContactedValue
    */
   const markContacted = (newContactedValue: boolean) => {
-    // TODO - implement
-    console.log('TODO - implement');
+    if (!patient) return;
+
+    // Update local state immediately for better UX
+    setPatient({ ...patient, contacted: newContactedValue });
+
+    // Make a PATCH request to update the database
+    axios
+      .patch(`http://localhost:3333/patients/${patientId}`, {
+        contacted: newContactedValue,
+      })
+      .then((response) => {
+        if (response?.data) {
+          setPatient(response.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error updating patient:', error);
+        // Optionally, revert the local state if the update fails
+        setPatient({ ...patient, contacted: !newContactedValue });
+      });
   };
 
   /**
@@ -105,7 +123,9 @@ export function PatientPage(props: PatientPageProps) {
             icon={<LeftOutlined />}
             onClick={() => history.push(PatientOverviewUrl)}
           />
-          <h1>({currentPatientIndex} / {totalPatients}) Patient: {patient.ssn}</h1>
+          <h1>
+            ({currentPatientIndex} / {totalPatients}) Patient: {patient.ssn}
+          </h1>
         </div>
 
         <div
