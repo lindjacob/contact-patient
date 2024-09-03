@@ -64,7 +64,10 @@ export function PatientOverviewPage() {
         <Button
           type="link"
           onClick={() =>
-            history.push(PatientUrl.replace(':patientId', record.id))
+            history.push({
+              pathname: PatientUrl.replace(':patientId', record.id),
+              state: { patients },
+            })
           }
         >
           View

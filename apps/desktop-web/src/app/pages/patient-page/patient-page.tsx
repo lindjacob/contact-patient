@@ -1,12 +1,14 @@
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { DetailedPatientDto } from '@contact-patient/dtos';
+import { DetailedPatientDto, ListPatientDto } from '@contact-patient/dtos';
 import { Button, Descriptions, Skeleton } from 'antd';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router-dom';
 import { PatientOverviewUrl } from '../urls';
+import { PatientUrl } from '../urls';
 
+type Patients = { patients: ListPatientDto[] };
 export type PatientPageProps = RouteComponentProps<{ patientId: string }>;
 
 export function PatientPage(props: PatientPageProps) {
@@ -16,6 +18,9 @@ export function PatientPage(props: PatientPageProps) {
   // Get the patient ID from the URL
   const patientId = props?.match?.params?.patientId;
 
+  // Retrieve state from history
+  const { patients } = history.location.state as Patients;
+
   // Detailed patient state
   const [patient, setPatient] = useState<DetailedPatientDto>();
 
@@ -23,8 +28,8 @@ export function PatientPage(props: PatientPageProps) {
   const [loadingPatient, setLoadingPatient] = useState(false);
 
   // TODO - implement
-  const currentPatientIndex = 0;
-  const totalPatients = 0;
+  const [currentPatientIndex, setCurrentPatientIndex] = useState(0);
+  const totalPatients = patients.length ?? 0;
 
   /**
    * Fetch patient details when ID changes.
@@ -72,16 +77,24 @@ export function PatientPage(props: PatientPageProps) {
    * Function for going to the previous patient.
    */
   const goToPreviousPatient = () => {
-    // TODO - implement
-    console.log('TODO - implement');
+    setCurrentPatientIndex(currentPatientIndex - 1);
+    const previousPatient = patients[currentPatientIndex - 1];
+    history.push({
+      pathname: PatientUrl.replace(':patientId', previousPatient.id),
+      state: { patients },
+    });
   };
 
   /**
    * Function for going to the next patient.
    */
   const goToNextPatient = () => {
-    // TODO - implement
-    console.log('TODO - implement');
+    setCurrentPatientIndex(currentPatientIndex + 1);
+    const nextPatient = patients[currentPatientIndex + 1];
+    history.replace({
+      pathname: PatientUrl.replace(':patientId', nextPatient.id),
+      state: { patients },
+    });
   };
 
   // If loading patient, show loading animation
@@ -119,7 +132,7 @@ export function PatientPage(props: PatientPageProps) {
             onClick={() => history.push(PatientOverviewUrl)}
           />
           <h1>
-            ({currentPatientIndex} / {totalPatients}) Patient: {patient.ssn}
+            ({currentPatientIndex + 1} / {totalPatients}) Patient: {patient.ssn}
           </h1>
         </div>
 
@@ -136,7 +149,6 @@ export function PatientPage(props: PatientPageProps) {
             type="primary"
             onClick={() => goToPreviousPatient()}
             icon={<LeftOutlined />}
-            // TODO - maybe update the disabled state?
             disabled={currentPatientIndex === 0}
           />
           <Button
@@ -149,7 +161,6 @@ export function PatientPage(props: PatientPageProps) {
             type="primary"
             onClick={() => goToNextPatient()}
             icon={<RightOutlined />}
-            // TODO - maybe update the disabled state?
             disabled={currentPatientIndex === totalPatients - 1}
           />
         </div>
